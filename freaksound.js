@@ -56,7 +56,7 @@
         function freakSound(args) {
             FreakSound.apply(this, args);
         }
-        freakSound.prototype = freakSound.prototype;
+        freakSound.prototype = FreakSound.prototype;
 
         return new freakSound(args);
     }

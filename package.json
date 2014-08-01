@@ -1,30 +1,35 @@
 {
-    "name": "freakSound",
-    "version": "0.1.0",
-    "author": "Ivan Banov",
-    "contributors": [{
+  "name": "freakSound",
+  "version": "0.1.0",
+  "author": "Ivan Banov",
+  "contributors": [
+    {
       "name": "Alan Esquina",
       "email": "alanesquina@gmail.com"
-    }],
-    "description": "Mix sounds",
-    "homepage": "http://nofreakz.com/",
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/allanesquina/freaksound.git"
-    },
-    "bugs": {
-      "url": "https://github.com/allanesquina/freaksound/issues"
-    },
-    "main": "index.html",
-    "licenses": [{
-        "type": "GNU"
-    }],
-    "engines": {
-        "node": ">= 0.10.0"
-    },
-    "devDependencies": {
-        "grunt": "~0.4.5",
-        "grunt-contrib-jshint": "~0.10.0",
-        "grunt-contrib-watch": "~0.6.1"
     }
+  ],
+  "description": "Mix sounds",
+  "homepage": "http://nofreakz.com/",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/allanesquina/freaksound.git"
+  },
+  "bugs": {
+    "url": "https://github.com/allanesquina/freaksound/issues"
+  },
+  "main": "index.html",
+  "licenses": [
+    {
+      "type": "GNU"
+    }
+  ],
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-contrib-concat": "^0.5.0",
+    "grunt-contrib-jshint": "~0.10.0",
+    "grunt-contrib-watch": "~0.6.1"
+  }
 }

@@ -1,0 +1,20 @@
+{
+  "name": "freaksound",
+  "version": "0.1.0",
+  "homepage": "https://github.com/nofreakz/freakSound",
+  "authors": [
+    "Ivan Banov <ivanbanov@gmail.com>",
+    "Alan Esquina <alanesquina@gmail.com>"
+  ],
+  "description": "Web audio JS library",
+  "main": "src/freaksound.js",
+  "ignore": [
+    "**/.*",
+    "node_modules"
+  ],
+  "keywords": [
+    "audio",
+    "github"
+  ],
+  "license": "GNU"
+}

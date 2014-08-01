@@ -1,21 +1,14 @@
 {
   "name": "freakSound",
   "version": "0.1.0",
-  "author": "Ivan Banov",
-  "contributors": [
-    {
-      "name": "Alan Esquina",
-      "email": "alanesquina@gmail.com"
-    }
-  ],
-  "description": "Mix sounds",
-  "homepage": "http://nofreakz.com/",
+  "author": "noFreakz",
+  "description": "Web audio JS library",
   "repository": {
     "type": "git",
-    "url": "git://github.com/allanesquina/freaksound.git"
+    "url": "git://github.com/nofreakz/freaksound.git"
   },
   "bugs": {
-    "url": "https://github.com/allanesquina/freaksound/issues"
+    "url": "https://github.com/nofreakz/freaksound/issues"
   },
   "main": "index.html",
   "licenses": [

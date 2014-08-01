@@ -1,9 +1,9 @@
 module.exports = function(grunt) {
     grunt.initConfig({
-        pkg: grunt.file.readJSON('package.json'),
+        pkg: grunt.file.readJSON('bower.json'),
         meta: {
             banner: '/*\n' +
-                ' *  <%= pkg.anme || pkg.author %> - v<%= pkg.version %>\n' +
+                ' *  <%= pkg.title || pkg.name %> - v<%= pkg.version %>\n' +
                 ' *  <%= pkg.description %>\n' +
                 ' *  <%= pkg.homepage %>\n' +
                 ' *\n' +

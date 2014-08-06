@@ -1,3 +1,11 @@
+/*
+ *  freaksound - v0.1.0
+ *  Web audio JS library
+ *  https://github.com/nofreakz/freakSound
+ *
+ *  Copyright (c) 2014
+ *  MIT License
+ */
 ;(function( win, doc ) {
     'use strict';
 

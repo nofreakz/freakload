@@ -3,18 +3,22 @@
   "version": "0.1.0",
   "homepage": "https://github.com/nofreakz/freakSound",
   "authors": [
-    "Ivan Banov <ivanbanov@gmail.com>",
-    "Alan Esquina <alanesquina@gmail.com>"
+    "Ivan Banov <ivanbanov@gmail.com>"
   ],
   "description": "Web audio JS library",
   "main": "src/freaksound.js",
   "ignore": [
     "**/.*",
-    "node_modules"
+    "node_modules",
+    "bower_component"
   ],
   "keywords": [
-    "audio",
-    "github"
+    "js",
+    "lib",
+    "audio"
   ],
-  "license": "GNU"
+  "license": "MIT",
+  "dependencies": {
+    "normalize.less": "~1.0.0"
+  }
 }

@@ -1,5 +1,6 @@
 {
     "asi": true,
+    "boss": true,
     "curly": true,
     "eqeqeq": true,
     "esnext": true,
@@ -8,7 +9,7 @@
     "latedef": true,
     "newcap": true,
     "noarg": true,
-    "node": true,
     "quotmark": "single",
-    "strict": true
+    "strict": true,
+    "trailing": true
 }

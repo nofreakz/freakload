@@ -1,14 +1,14 @@
 {
-  "name": "freakSound",
+  "name": "freakLoad",
   "version": "0.1.0",
   "author": "noFreakz",
-  "description": "Web audio JS library",
+  "description": "Preloader JS library",
   "repository": {
     "type": "git",
-    "url": "git://github.com/nofreakz/freaksound.git"
+    "url": "git://github.com/nofreakz/freakload.git"
   },
   "bugs": {
-    "url": "https://github.com/nofreakz/freaksound/issues"
+    "url": "https://github.com/nofreakz/freakload/issues"
   },
   "main": "index.html",
   "licenses": [

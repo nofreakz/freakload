@@ -1,12 +1,12 @@
 {
-  "name": "freaksound",
+  "name": "freakLoad",
   "version": "0.1.0",
-  "homepage": "https://github.com/nofreakz/freakSound",
+  "homepage": "https://github.com/nofreakz/freakLoad",
   "authors": [
     "Ivan Banov <ivanbanov@gmail.com>"
   ],
-  "description": "Web audio JS library",
-  "main": "src/freaksound.js",
+  "description": "Preloader JS library",
+  "main": "src/freakLoad.js",
   "ignore": [
     "**/.*",
     "node_modules",
@@ -19,6 +19,9 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "normalize.less": "~1.0.0"
+    "normalize.less": "~1.0.0",
+    "jasmine": "~2.0.1",
+    "jasmine-jquery": "~2.0.5",
+    "jquery": "~2.1.1"
   }
 }

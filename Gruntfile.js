@@ -16,14 +16,8 @@ module.exports = function(grunt) {
                 banner: '<%= meta.banner %>'
             },
             dist: {
-                src: ['src/js/freaksound.js'],
-                dest: 'dist/js/freaksound.js'
-            }
-        },
-        jshint: {
-            files: ['src/js/freaksound.js'],
-            options: {
-                jshintrc: ".jshintrc"
+                src: ['src/js/freakload.js'],
+                dest: 'dist/js/freakload.js'
             }
         },
         uglify: {
@@ -31,8 +25,8 @@ module.exports = function(grunt) {
                 banner: '<%= meta.banner %>'
             },
             my_target: {
-                src: ['dist/js/freaksound.js'],
-                dest: 'dist/js/freaksound.min.js'
+                src: ['dist/js/freakload.js'],
+                dest: 'dist/js/freakload.min.js'
             }
         },
         less: {
@@ -53,6 +47,22 @@ module.exports = function(grunt) {
                 files: {
                     "dist/css/main.min.css": "src/less/main.less"
                 }
+            }
+        },
+        jshint: {
+            files: ['src/**/*.js'],
+            options: {
+                jshintrc: ".jshintrc"
+            }
+        },
+        jasmine: {
+            src: 'src/**/*.js',
+            options: {
+                vendor: [
+                    'bower_components/jquery/dist/jquery.min.js',
+                    'bower_components/jasmine-jquery/lib/jasmine-jquery.js'
+                ],
+                specs: 'test/*.spec..js'
             }
         },
         watch: {
@@ -80,12 +90,14 @@ module.exports = function(grunt) {
     });
 
     grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-less');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-jasmine')
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-connect');
 
-    grunt.registerTask('server', [ 'connect', 'watch' ]);
-    grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'less']);
+    grunt.registerTask('server', ['connect', 'watch']);
+    grunt.registerTask('test', ['jshint', 'jasmine']);
+    grunt.registerTask('build', ['jshint', 'concat', 'uglify', 'less']);
 };

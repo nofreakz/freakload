@@ -5,15 +5,14 @@
         DEFAULTS
     ============================== */
 
-    var audioContext = win.AudioContex || win.webkitAudioContext,
-        browserSupport = !!( audioContext );
+    var defaults = {};
 
 
     /* ==============================
         CONSTRUCTOR
     ============================== */
 
-    function FreakSound() {
+    function FreakLoad() {
         this.init();
     }
 
@@ -22,7 +21,7 @@
         PUBLIC
     ============================== */
 
-    FreakSound.prototype = {
+    FreakLoad.prototype = {
         init: function() {
         },
 
@@ -50,18 +49,14 @@
         GLOBAL API
     ============================== */
 
-    win.freakSound = function() {
+    win.freakLoad = function() {
         var args = arguments;
 
-        function FreakSound( args ) {
-            FreakSound.apply( this, args );
+        function FreakLoad( args ) {
+            FreakLoad.apply( this, args );
         }
-        freakSound.prototype = FreakSound.prototype;
+        freakLoad.prototype = FreakLoad.prototype;
 
-        if ( browserSupport ) {
-            return new FreakSound( args );
-        } else {
-            console.error( 'Web Audio API is not supported in this browser' );
-        }
+        return new FreakLoad( args );
     }
 })( window, document );

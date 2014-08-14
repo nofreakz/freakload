@@ -2,14 +2,25 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>FREAK SOUND ♪♫</title>
+    <title>FREAKLOAD</title>
     <link rel="stylesheet" href="dist/css/main.css" />
 </head>
 <body>
 
-    <script src="dist/js/freakload.js"></script>
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="dist/js/freakload.min.js"></script>
     <script>
-        freakLoad();
+        $(function() {
+            var imgs = [],
+                i = 0;
+
+            while (i < 10) {
+                imgs[i] = 'assets/img/img' + (i + 1) + '.jpg';
+                i++;
+            }
+
+            freakLoad(imgs);
+        });
     </script>
 </body>
 </html>

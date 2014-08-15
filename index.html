@@ -3,23 +3,29 @@
 <head>
     <meta charset="utf-8" />
     <title>FREAKLOAD</title>
-    <link rel="stylesheet" href="dist/css/main.css" />
+    <link rel="stylesheet" href="dist/css/main.min.css" />
 </head>
 <body>
+    <h1>FreakLoad</h1>
 
     <script src="assets/vendor/jquery/dist/jquery.min.js"></script>
-    <script src="dist/js/freakload.min.js"></script>
+    <script src="dist/js/jquery.freakload.js"></script>
     <script>
         $(function() {
             var imgs = [],
+                html = '',
                 i = 0;
 
-            while (i < 10) {
+            while (i < 6) {
                 imgs[i] = 'assets/img/img' + (i + 1) + '.jpg';
+                html += '<li><img src="' + imgs[i] + '" /></li>';
                 i++;
             }
 
-            freakLoad(imgs);
+            html = $('<ul />').append(html);
+            $('body').append(html);
+
+            $.freakLoad(imgs);
         });
     </script>
 </body>

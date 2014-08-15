@@ -16,8 +16,8 @@ module.exports = function(grunt) {
                 banner: '<%= meta.banner %>'
             },
             dist: {
-                src: ['src/js/freakload.js'],
-                dest: 'dist/js/freakload.js'
+                src: ['src/js/jquery.freakload.js'],
+                dest: 'dist/js/jquery.freakload.js'
             }
         },
         uglify: {
@@ -25,8 +25,8 @@ module.exports = function(grunt) {
                 banner: '<%= meta.banner %>'
             },
             my_target: {
-                src: ['dist/js/freakload.js'],
-                dest: 'dist/js/freakload.min.js'
+                src: ['dist/js/jquery.freakload.js'],
+                dest: 'dist/js/jquery.freakload.min.js'
             }
         },
         less: {
@@ -70,8 +70,8 @@ module.exports = function(grunt) {
                 livereload: true
             },
             scripts: {
-                files: '**/*.js',
-                tasks: ['jshint']
+                files: ['src/**/*.js', './*.js'],
+                tasks: ['jshint', 'concat', 'uglify']
             },
             css: {
                 files: '**/*.less',

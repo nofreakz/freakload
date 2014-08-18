@@ -3,6 +3,13 @@
     'use strict';
 
     var _plugin = 'freakLoad',
+        itemTpl = {
+            url: '',
+            priority: 0.5,
+            tags: [],
+            isLoading: false,
+            normalized: true
+        },
         defaults = {
             async: true,
             maxQueueSize: 4,
@@ -40,15 +47,57 @@
         /*
          * PUBLIC
          */
-        init: function() {},
+        init: function() {
+            this.items = this._normalizeItems(this.items);
+            this._load();
+        },
         add: function () {},
         remove: function() {},
+        stop: function() {},
+        continue: function() {},
         loadGroup: function() {},
 
         /*
          * PRIVATE
          */
-        _addQueue: function () {}
+        _normalizeItems: function(items) {
+            var item = {},
+                len = 0,
+                i = 0;
+
+            // if argument 'items' isn't a Array set as
+            if (!(items instanceof Array)) {
+                items = [items];
+            }
+
+            // read the size of the array items
+            len = items.length;
+
+            // normalize with the template setted up previously
+            for (; len--; i++) {
+                item = items[i];
+
+                if (typeof item !== 'object') {
+                    item = { url: item }
+                }
+
+                items[i] = $.extend({}, itemTpl, item);
+            }
+
+            this._setPriority(items);
+
+            return items;
+        },
+        _setPriority: function(items) {
+            // organize items by priority
+            items.sort(function(a, b) {
+                return b.priority - a.priority;
+            });
+
+            return items;
+        },
+        _addItem: function () {},
+        _removeItem: function () {}
     }
 
 
@@ -63,7 +112,7 @@
 
         // force to pass a method or items to plugin load
         if (!args.length || (!data && !items)) {
-            console.error('The jquery plugin ' + _plugin + ' is not able to run whitout arguments or array of items to load.');
+            $.error('The jquery plugin ' + _plugin + ' is not able to run whitout arguments or array of items to load.');
             return;
 
         // if it still doesn't have gone instanced, do that

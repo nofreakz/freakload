@@ -2,60 +2,87 @@
 
     'use strict';
 
+
+
+    /*
+     * DEFAULTS
+     */
     var _plugin = 'freakLoad',
         itemTpl = {
             url: '',
+            data: {},
             priority: 0.5,
             tags: [],
             isLoading: false,
-            normalized: true
+            async: true
+        },
+        groupTpl = {
+            name: '',
+            isLoading: false
         },
         defaults = {
             async: true,
-            maxQueueSize: 4,
-            onStart: $.noop,
-            onComplete: $.noop,
-            onItemStart: $.noop,
-            onItemComplete: $.noop,
-            onGroupStart: $.noop,
-            onGroupComplete: $.noop
+            loadByGroup: false,
+            on: {
+                start: $.noop,
+                complete: $.noop
+            },
+            onItem: {
+                start: $.noop,
+                complete: $.noop
+            },
+            onGroup: {
+                start: $.noop,
+                complete: $.noop
+            }
         };
 
+
+
+    /*
+     * CONSTRUCTOR
+     */
     function Plugin(items, options) {
         this.items = items;
         this.opt = $.extend({}, defaults, options);
         this.init();
     }
 
+
+
     Plugin.prototype = {
         /*
          * DATA
          */
-        xhr: null,
-
-        /*
-         * items = [{
-         *     url: '/path/to/file',
-         *     priority: 0.0 ~ 1.0,
-         *     tags: 'item;item',
-         *     isLoading: boolean
-         * }]
-         */
-        queue: [],
         isLoading: false,
+        xhr: null, // XMLHttpRequest
+        queue: [],
+        loaded: {
+            items: [],
+            group: []
+        },
+        groups: [],
+
 
         /*
          * PUBLIC
          */
         init: function() {
             this.items = this._normalizeItems(this.items);
-            this._load();
+            this._load(this.items);
         },
+
         add: function () {},
+
         remove: function() {},
+
         stop: function() {},
+
         continue: function() {},
+
         loadGroup: function() {},
+
+
 
         /*
          * PRIVATE
@@ -88,6 +115,7 @@
 
             return items;
         },
+
         _setPriority: function(items) {
             // organize items by priority
             items.sort(function(a, b) {
@@ -97,8 +125,56 @@
             return items;
         },
         _addItem: function () {},
-        _removeItem: function () {}
+
+        _removeItem: function () {},
+
+        _load: function(items) {
+            var self = this,
+                loaded = self.loaded.items,
+                item = '',
+                isImage = false,
+                len = items.length,
+                i = 0;
+
+            // preloader
+            for (; len--; i++) {
+                item = items[i];
+
+                // check if the item has been loaded
+                if (this.loaded.items.indexOf(item.url) <= -1) {
+                    // flag as loading and fire the callback
+                    this.isLoading = true;
+                    this.opt.onItem.start();
+
+                    /*
+                     * HOLD FUNCTIONS TO SYNC CALLINGS HERE
+                     */
+                    // set xhr
+                    this.xhr = $.ajax({
+                        url: item.url,
+                        data: item.data,
+                        async: item.async ? item.async : self.opt.async,
+                        success: function(data) {
+                            console.log('-----');
+                            // add to array of loaded items
+                            loaded[loaded.length] = item.url + '?' + item.data;
+                            // the data will only be passed to callback if the item won't a image
+                            self.opt.onItem.complete((/\.(gif|jpg|png|svg)$/).test(item.url) ? '' : data);
+                        },
+                        error: function(jqXHR, status) {
+                            $.error(jqXHR.responseText);
+                        }
+                    })
+                    /*
+                    * callbacks
+                    * add itens to item loaded
+                    * preload false, ready to the next one
+                    */
+                }
+            }
+        }
     }
+
 
 
     /*

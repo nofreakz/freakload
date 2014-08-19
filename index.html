@@ -18,14 +18,20 @@
 
             while (i < 6) {
                 imgs[i] = 'assets/img/img' + (i + 1) + '.jpg';
-                html += '<li><img src="' + imgs[i] + '" /></li>';
+                html += '<li><img data-src="' + imgs[i] + '" /></li>';
                 i++;
             }
 
             html = $('<ul />').append(html);
             $('body').append(html);
 
-            $.freakLoad(imgs);
+            $.freakLoad(imgs, {
+                on: {
+                    complete: function() {
+                        console.log('COMPLETE');
+                    }
+                }
+            });
         });
     </script>
 </body>

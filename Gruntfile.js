@@ -65,6 +65,15 @@ module.exports = function(grunt) {
                 specs: 'test/*.spec..js'
             }
         },
+        connect: {
+            server: {
+                options: {
+                    port: 9000,
+                    hostname: "localhost",
+                    livereload: true
+                }
+            }
+        },
         watch: {
             options: {
                 livereload: true
@@ -76,15 +85,6 @@ module.exports = function(grunt) {
             css: {
                 files: '**/*.less',
                 tasks: ['less']
-            }
-        },
-        connect: {
-            server: {
-                options: {
-                    port: 9000,
-                    hostname: "localhost",
-                    livereload: true
-                }
             }
         }
     });

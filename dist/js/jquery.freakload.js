@@ -24,13 +24,10 @@
             isLoading: false,
             async: true
         },
-        groupTpl = {
-            name: '',
-            isLoading: false
-        },
         defaults = {
             async: true,
             loadByGroup: false,
+            groupOrder: [],
             on: {
                 start: $.noop,
                 complete: $.noop
@@ -52,11 +49,9 @@
      */
     function Plugin(items, options) {
         this.items = items;
-        this.opt = $.extend({}, defaults, options);
+        this.opt = $.extend(true, {}, defaults, options);
         this.init();
     }
-
-
 
     Plugin.prototype = {
         /*
@@ -64,31 +59,40 @@
          */
         isLoading: false,
         xhr: null, // XMLHttpRequest
-        queue: [],
+        groups: [],
+
+        // use queue as object to possibility multiple queues
+        queue: {
+            general: []
+        },
         loaded: {
             items: [],
             group: []
         },
-        groups: [],
 
 
         /*
          * PUBLIC
          */
         init: function() {
-            this.items = this._normalizeItems(this.items);
-            this._load(this.items);
+            var group;
+
+            this._addItems(this.items);
+
+            // if has a groupOrder it'll load group by group listed
+            // groups that weren't listed will load as regular item
+            if (this.loadByGroup) {
+                for (group in this.groupOrder) {
+                    this.loadGroup(group);
+                }
+            } else {
+                this._request();
+            }
         },
 
-        add: function () {},
-
-        remove: function() {},
-
-        stop: function() {},
-
-        continue: function() {},
-
-        loadGroup: function() {},
+        loadGroup: function(group) {
+            this._request(group);
+        },
 
 
 
@@ -113,7 +117,7 @@
                 item = items[i];
 
                 if (typeof item !== 'object') {
-                    item = { url: item }
+                    item = { url: item };
                 }
 
                 items[i] = $.extend({}, itemTpl, item);
@@ -132,53 +136,99 @@
 
             return items;
         },
-        _addItem: function () {},
 
-        _removeItem: function () {},
+        _addItems: function(items) {
+            var item = {},
+                tag,
+                i;
 
-        _load: function(items) {
-            var self = this,
-                loaded = self.loaded.items,
-                item = '',
-                isImage = false,
-                len = items.length,
-                i = 0;
+            items = this._normalizeItems(items);
 
-            // preloader
-            for (; len--; i++) {
+            for (i in items) {
                 item = items[i];
+                this.queue.general[this.queue.general.length] = item;
 
-                // check if the item has been loaded
-                if (this.loaded.items.indexOf(item.url) <= -1) {
-                    // flag as loading and fire the callback
-                    this.isLoading = true;
-                    this.opt.onItem.start();
+                // create the new queues based on tags
+                if (item.tags.length) {
+                    for (tag in item.tags) {
+                        tag = item.tags[tag];
 
-                    /*
-                     * HOLD FUNCTIONS TO SYNC CALLINGS HERE
-                     */
-                    // set xhr
-                    this.xhr = $.ajax({
-                        url: item.url,
-                        data: item.data,
-                        async: item.async ? item.async : self.opt.async,
-                        success: function(data) {
-                            console.log('-----');
-                            // add to array of loaded items
-                            loaded[loaded.length] = item.url + '?' + item.data;
-                            // the data will only be passed to callback if the item won't a image
-                            self.opt.onItem.complete((/\.(gif|jpg|png|svg)$/).test(item.url) ? '' : data);
-                        },
-                        error: function(jqXHR, status) {
-                            $.error(jqXHR.responseText);
+                        // if the new tag still doesn't have a queue create one
+                        if (!this.queue.hasOwnProperty(tag)) {
+                            this.queue[tag] = []
+
+                            // create a new group on groups
+                            this.groups[this.groups.length] = {
+                                name: tag,
+                                itemsRequested: 0,
+                                isLoading: false
+                            }
                         }
-                    })
-                    /*
-                    * callbacks
-                    * add itens to item loaded
-                    * preload false, ready to the next one
-                    */
+
+                        // add item to specific queue
+                        this.queue[tag][this.queue[tag].length] = item;
+                    }
                 }
+            }
+        },
+
+        _request: function(group) {
+            var self = this,
+                // "general" is the default queue where all items are loadeds
+                queue = !group ? 'general' : group;
+
+            group = self.groups[queue];
+
+            // set group as lodaing
+            group.isLoading = true;
+
+            // recursion to load all items considering the queues
+            setTimeout(function() {
+                self._load(group[group[requested]]);
+                group[requested]++;
+            }, 0);
+        },
+
+        _load: function(item) {
+            var self = this,
+                loadedItems = this.loaded.items,
+                isImage = false;
+
+            // check if the item has been loaded
+            if (loadedItems.indexOf(item.url) <= -1) {
+                // flag as loading and fire the callback
+                this.isLoading = true;
+                item.isLoading = true;
+                this.opt.onItem.start();
+
+                // set xhr
+                this.xhr = $.ajax({
+                                url: item.url,
+                                data: item.data,
+                                async: item.async ? item.async : self.opt.async
+                            })
+                            .success(function(data) {
+                                // add to array of loaded items
+                                self.loaded.items[loadedItems.length] = this.url + $.isPlainObject(item.data) ? '' : '?' + $.param(item.data);
+
+                                // the data will only be passed to callback if the item won't a image
+                                self.opt.onItem.complete((/\.(gif|jpg|png|svg)$/).test(item.url) ? '' : data);
+
+                                // clean the xhr
+                                self.xhr = null;
+
+                                // runs the final complete callabck when complete all items
+                                if (self.items.length === self.loaded.items.length) {
+                                    self.opt.on.complete();
+                                }
+                            })
+                            .fail(function(jqXHR, status) {
+                                $.error(jqXHR.responseText);
+                            })
+                            .always(function() {
+                                item.isLoading = false;
+                                self.isLoading = false;
+                            });
             }
         }
     }
@@ -214,7 +264,8 @@
 
         // finally if the method doesn't exist or is a private method show a console error
         } else if (!method || (typeof fn === 'string' && fn.charAt(0) === '_')) {
-            $.error('Method ' + fn + ' does not exist on jQuery.' + _plugin + ' ' + this);
+            $.error('Method ' + fn + ' does not exist on jQuery.' + _plugin);
         }
     };
+
 })(jQuery, window, document);

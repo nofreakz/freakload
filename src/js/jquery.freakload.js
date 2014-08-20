@@ -50,16 +50,21 @@
          * DATA
          */
         isLoading: false,
+
         xhr: null, // XMLHttpRequest
-        groups: [],
+
+        groups: {},
+
+        itemsRequested: 0,
 
         // use queue as object to possibility multiple queues
         queue: {
             general: []
         },
+
         loaded: {
             items: [],
-            group: []
+            groups: []
         },
 
 
@@ -82,8 +87,9 @@
             }
         },
 
-        loadGroup: function(group) {
-            this._request(group);
+        loadGroup: function(tag) {
+            this._createGroup(tag);
+            this._request(tag);
         },
 
 
@@ -129,6 +135,19 @@
             return items;
         },
 
+        _createGroup: function(tag) {
+            // if the new tag still doesn't have a queue create one
+            if (!this.queue.hasOwnProperty(tag)) {
+                this.queue[tag] = []
+
+                // create a new group on groups
+                this.groups[tag] = {
+                    itemsRequested: 0,
+                    isLoading: false
+                }
+            }
+        },
+
         _addItems: function(items) {
             var item = {},
                 tag,
@@ -144,18 +163,7 @@
                 if (item.tags.length) {
                     for (tag in item.tags) {
                         tag = item.tags[tag];
-
-                        // if the new tag still doesn't have a queue create one
-                        if (!this.queue.hasOwnProperty(tag)) {
-                            this.queue[tag] = []
-
-                            // create a new group on groups
-                            this.groups[this.groups.length] = {
-                                name: tag,
-                                itemsRequested: 0,
-                                isLoading: false
-                            }
-                        }
+                        this._createGroup(tag);
 
                         // add item to specific queue
                         this.queue[tag][this.queue[tag].length] = item;
@@ -164,20 +172,49 @@
             }
         },
 
-        _request: function(group) {
+        _request: function(groupName) {
             var self = this,
-                // "general" is the default queue where all items are loadeds
-                queue = !group ? 'general' : group;
+                loader = null,
 
-            group = self.groups[queue];
+                // group only will be setted if the function recive a groupName
+                group,
 
-            // set group as lodaing
-            group.isLoading = true;
+                // item is going to be setted on loader
+                // it'will be the item to be sent to _load
+                item;
+
+            // set group as lodaing and point the specific queue to load
+            if (groupName) {
+                group = this.groups[groupName];
+                group.isLoading = true;
+            }
 
             // recursion to load all items considering the queues
-            setTimeout(function() {
-                self._load(group[group[requested]]);
-                group[requested]++;
+            // use timeInterval instead timeOut
+            // check: http://jsperf.com/setinterval-vs-recursive-settimeout
+            loader = setInterval(function() {
+                // first, request items by group
+                if (group && group.itemsRequested < self.queue[groupName].length) {
+                    item = self.queue[groupName][group.itemsRequested];
+
+                // request all items
+                // "general" is the default queue where all items are inserted
+                } else if (self.itemsRequested < self.queue.general.length) {
+                    item = self.queue.general[self.itemsRequested];
+
+                // stop requests when don't have more items in any queue
+                } else {
+                    return clearInterval(loader);
+                }
+
+                // just fire the loading if have items to do that
+                if (item) {
+                    (group ? group : self).itemsRequested++;
+                    self._load(item);
+
+                    // reset item to the next loading
+                    item = null;
+                }
             }, 0);
         },
 

@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>FREAKLOAD</title>
+    <title>FreakLoad</title>
     <link rel="stylesheet" href="dist/css/main.min.css" />
 </head>
 <body>
@@ -28,8 +28,15 @@
             $.freakLoad(imgs, {
                 on: {
                     complete: function() {
-                        console.log('COMPLETE');
+                        $('img').each(function() {
+                            var $this = $(this);
+                            $this.attr('src', $this.data('src'));
+                        });
                     }
+                },
+                onItem: {
+                    start: function() { console.log('start'); },
+                    complete: function() { console.log('item'); }
                 }
             });
         });

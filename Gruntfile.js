@@ -1,4 +1,6 @@
 module.exports = function(grunt) {
+    'use strict';
+
     grunt.initConfig({
         pkg: grunt.file.readJSON('bower.json'),
         meta: {
@@ -32,27 +34,27 @@ module.exports = function(grunt) {
         less: {
             development: {
                 options: {
-                    paths: ["dist/css"]
+                    paths: ['dist/css']
                 },
                 files: {
-                    "dist/css/main.css": "src/less/main.less"
+                    'dist/css/main.css': 'src/less/main.less'
                 }
             },
             production: {
                 options: {
-                    paths: ["dist/css"],
+                    paths: ['dist/css'],
                     compress: true,
                     cleancss: true
                 },
                 files: {
-                    "dist/css/main.min.css": "src/less/main.less"
+                    'dist/css/main.min.css': 'src/less/main.less'
                 }
             }
         },
         jshint: {
-            files: ['src/**/*.js'],
+            files: ['./*.js', 'src/**/*.js'],
             options: {
-                jshintrc: ".jshintrc"
+                jshintrc: '.jshintrc'
             }
         },
         jasmine: {
@@ -62,14 +64,14 @@ module.exports = function(grunt) {
                     'assets/vendor/jquery/dist/jquery.min.js',
                     'assets/vendor/jasmine-jquery/lib/jasmine-jquery.js'
                 ],
-                specs: 'test/*.spec..js'
+                specs: 'test/*.spec.js'
             }
         },
         connect: {
             server: {
                 options: {
                     port: 9000,
-                    hostname: "localhost",
+                    hostname: 'localhost',
                     livereload: true
                 }
             }
@@ -79,7 +81,7 @@ module.exports = function(grunt) {
                 livereload: true
             },
             scripts: {
-                files: ['src/**/*.js', './*.js'],
+                files: ['./*.js', 'test/**/*.js', 'src/**/*.js'],
                 tasks: ['jshint', 'concat', 'uglify']
             },
             css: {

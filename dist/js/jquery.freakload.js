@@ -24,6 +24,11 @@
             isLoading: false,
             async: true
         },
+        groupTpl = {
+            itemsRequested: 0,
+            isLoading: false,
+            items: []
+        },
         defaults = {
             async: true,
             loadByGroup: false,
@@ -57,17 +62,17 @@
         /*
          * DATA
          */
-        isLoading: false,
-
         xhr: null, // XMLHttpRequest
 
-        groups: {},
-
-        itemsRequested: 0,
 
         // use queue as object to possibility multiple queues
         queue: {
-            general: []
+            itemsRequested: 0,
+            isLoading: false,
+            items: [],
+            groups: {
+                /* @groupTpl */
+            }
         },
 
         loaded: {
@@ -100,11 +105,38 @@
             this._request(tag);
         },
 
+        add: function() {},
+
 
 
         /*
          * PRIVATE
          */
+        _addItems: function(items) {
+            var item = {},
+                queue = this.queue,
+                tag,
+                i;
+
+            items = this._normalizeItems(items);
+
+            for (i in items) {
+                item = items[i];
+                queue.items[queue.items.length] = item;
+
+                // create the new queues based on tags
+                if (item.tags.length) {
+                    for (tag in item.tags) {
+                        tag = item.tags[tag];
+                        this._createGroup(tag);
+
+                        // add item to specific queue
+                        queue.groups[tag].items[queue.groups[tag].items.length] = item;
+                    }
+                }
+            }
+        },
+
         _normalizeItems: function(items) {
             var item = {},
                 len = 0,
@@ -145,44 +177,16 @@
 
         _createGroup: function(tag) {
             // if the new tag still doesn't have a queue create one
-            if (!this.queue.hasOwnProperty(tag)) {
-                this.queue[tag] = []
-
+            if (!this.queue.groups.hasOwnProperty(tag)) {
                 // create a new group on groups
-                this.groups[tag] = {
-                    itemsRequested: 0,
-                    isLoading: false
-                }
-            }
-        },
-
-        _addItems: function(items) {
-            var item = {},
-                tag,
-                i;
-
-            items = this._normalizeItems(items);
-
-            for (i in items) {
-                item = items[i];
-                this.queue.general[this.queue.general.length] = item;
-
-                // create the new queues based on tags
-                if (item.tags.length) {
-                    for (tag in item.tags) {
-                        tag = item.tags[tag];
-                        this._createGroup(tag);
-
-                        // add item to specific queue
-                        this.queue[tag][this.queue[tag].length] = item;
-                    }
-                }
+                this.queue.groups[tag] = groupTpl;
             }
         },
 
         _request: function(groupName) {
             var self = this,
                 loader = null,
+                queue = this.queue,
 
                 // group only will be setted if the function recive a groupName
                 group,
@@ -193,7 +197,7 @@
 
             // set group as lodaing and point the specific queue to load
             if (groupName) {
-                group = this.groups[groupName];
+                group = queue.groups[groupName];
                 group.isLoading = true;
             }
 
@@ -202,13 +206,13 @@
             // check: http://jsperf.com/setinterval-vs-recursive-settimeout
             loader = setInterval(function() {
                 // first, request items by group
-                if (group && group.itemsRequested < self.queue[groupName].length) {
-                    item = self.queue[groupName][group.itemsRequested];
+                if (group && group.itemsRequested < group.items.length) {
+                    item = group.items[group.itemsRequested];
 
                 // request all items
                 // "general" is the default queue where all items are inserted
-                } else if (self.itemsRequested < self.queue.general.length) {
-                    item = self.queue.general[self.itemsRequested];
+                } else if (queue.itemsRequested < queue.items.length) {
+                    item = queue.items[queue.itemsRequested];
 
                 // stop requests when don't have more items in any queue
                 } else {
@@ -217,11 +221,12 @@
 
                 // just fire the loading if have items to do that
                 if (item) {
-                    (group ? group : self).itemsRequested++;
+                    (group ? group : queue).itemsRequested++;
                     self._load(item);
 
                     // reset item to the next loading
                     item = null;
+
                 }
             }, 0);
         },
@@ -236,7 +241,7 @@
                 // flag as loading and fire the callback
                 this.isLoading = true;
                 item.isLoading = true;
-                this.opt.onItem.start();
+                this.opt.onItem.start(item);
 
                 // set xhr
                 this.xhr = $.ajax({
@@ -304,5 +309,7 @@
             $.error('Method ' + fn + ' does not exist on jQuery.' + _plugin);
         }
     };
+
+    $.fn[_plugin] = function() {}
 
 })(jQuery, window, document);

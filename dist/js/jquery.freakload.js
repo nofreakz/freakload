@@ -20,7 +20,7 @@
             url: '',
             data: {},
             priority: 0.5,
-            tags: ['xxx'],
+            tags: [],
             isLoading: false,
             async: true
         },
@@ -31,8 +31,8 @@
         },
         defaults = {
             async: true,
-            loadByGroup: true,
-            groupOrder: ['xxx'],
+            loadByGroup: false,
+            groupOrder: [],
             on: {
                 start: $.noop,
                 complete: $.noop

@@ -20,7 +20,7 @@
             url: '',
             data: {},
             priority: 0.5,
-            tags: [],
+            tags: ['xxx'],
             isLoading: false,
             async: true
         },
@@ -31,8 +31,8 @@
         },
         defaults = {
             async: true,
-            loadByGroup: false,
-            groupOrder: [],
+            loadByGroup: true,
+            groupOrder: ['xxx'],
             on: {
                 start: $.noop,
                 complete: $.noop
@@ -91,8 +91,8 @@
 
             // if has a groupOrder it'll load group by group listed
             // groups that weren't listed will load as regular item
-            if (this.loadByGroup) {
-                for (group in this.groupOrder) {
+            if (this.opt.loadByGroup) {
+                for (group in this.opt.groupOrder) {
                     this.loadGroup(group);
                 }
             } else {
@@ -100,9 +100,9 @@
             }
         },
 
-        loadGroup: function(tag) {
-            this._createGroup(tag);
-            this._request(tag);
+        loadGroup: function(group) {
+            this._createGroup(group);
+            this._request(group);
         },
 
         add: function() {},
@@ -183,6 +183,8 @@
             }
         },
 
+        // the _request will organize the queues that will be send to _load
+        // if it gets a groupName the queue of the group will be prioritized
         _request: function(groupName) {
             var self = this,
                 loader = null,
@@ -209,37 +211,35 @@
                 if (group && group.itemsRequested < group.items.length) {
                     item = group.items[group.itemsRequested];
 
-                // request all items
-                // "general" is the default queue where all items are inserted
+                // request all items from queue where all items are inserted
                 } else if (queue.itemsRequested < queue.items.length) {
                     item = queue.items[queue.itemsRequested];
 
                 // stop requests when don't have more items in any queue
                 } else {
-                    return clearInterval(loader);
+                    queue.isLoading = false;
+                    clearInterval(loader);
+                    return;
                 }
 
-                // just fire the loading if have items to do that
-                if (item) {
-                    (group ? group : queue).itemsRequested++;
-                    self._load(item);
-
-                    // reset item to the next loading
-                    item = null;
-
+                // fire the loading and increment itemRequested to know when the queue finished
+                if (group) {
+                    group.itemsRequested++;
                 }
+                queue.itemsRequested++;
+                self._load(item, group);
+
             }, 0);
         },
 
         _load: function(item) {
             var self = this,
-                loadedItems = this.loaded.items,
-                isImage = false;
+                loadedItems = this.loaded.items;
 
             // check if the item has been loaded
             if (loadedItems.indexOf(item.url) <= -1) {
-                // flag as loading and fire the callback
-                this.isLoading = true;
+                // flag as loading and fire the starting callback
+                this.queue.isLoading = true;
                 item.isLoading = true;
                 this.opt.onItem.start(item);
 
@@ -253,8 +253,8 @@
                                 // add to array of loaded items
                                 self.loaded.items[loadedItems.length] = this.url + $.isPlainObject(item.data) ? '' : '?' + $.param(item.data);
 
-                                // the data will only be passed to callback if the item won't a image
-                                self.opt.onItem.complete((/\.(gif|jpg|png|svg)$/).test(item.url) ? '' : data);
+                                // the data will only be passed to callback if the item is a text file
+                                self.opt.onItem.complete((/\.(xml|json|script|html|text)$/).test(item.url) ? data : '');
 
                                 // clean the xhr
                                 self.xhr = null;
@@ -264,16 +264,15 @@
                                     self.opt.on.complete();
                                 }
                             })
-                            .fail(function(jqXHR, status) {
+                            .fail(function(jqXHR) {
                                 $.error(jqXHR.responseText);
                             })
                             .always(function() {
                                 item.isLoading = false;
-                                self.isLoading = false;
                             });
             }
         }
-    }
+    };
 
 
 
@@ -310,6 +309,6 @@
         }
     };
 
-    $.fn[_plugin] = function() {}
+    $.fn[_plugin] = function() {};
 
 })(jQuery, window, document);

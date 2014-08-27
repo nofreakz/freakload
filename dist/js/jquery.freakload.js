@@ -93,7 +93,7 @@
             // groups that weren't listed will load as regular item
             if (this.opt.loadByGroup) {
                 for (group in this.opt.groupOrder) {
-                    this.loadGroup(group);
+                    this.loadGroup(this.opt.groupOrder[group]);
                 }
             } else {
                 this._request();
@@ -113,10 +113,11 @@
          * PRIVATE
          */
         _addItems: function(items) {
-            var item = {},
-                queue = this.queue,
-                tag,
-                i;
+            var queue = this.queue,
+                item = {},
+                tag = '',
+                i = 0,
+                t = 0;
 
             items = this._normalizeItems(items);
 
@@ -126,8 +127,8 @@
 
                 // create the new queues based on tags
                 if (item.tags.length) {
-                    for (tag in item.tags) {
-                        tag = item.tags[tag];
+                    for (t in item.tags) {
+                        tag = item.tags[t];
                         this._createGroup(tag);
 
                         // add item to specific queue
@@ -139,7 +140,6 @@
 
         _normalizeItems: function(items) {
             var item = {},
-                len = 0,
                 i = 0;
 
             // if argument 'items' isn't a Array set as
@@ -147,18 +147,15 @@
                 items = [items];
             }
 
-            // read the size of the array items
-            len = items.length;
-
             // normalize with the template setted up previously
-            for (; len--; i++) {
+            for (i in items) {
                 item = items[i];
 
                 if (typeof item !== 'object') {
                     item = { url: item };
                 }
 
-                items[i] = $.extend({}, itemTpl, item);
+                items[i] = item = $.extend({}, itemTpl, item);
             }
 
             this._setPriority(items);
@@ -179,7 +176,7 @@
             // if the new tag still doesn't have a queue create one
             if (!this.queue.groups.hasOwnProperty(tag)) {
                 // create a new group on groups
-                this.queue.groups[tag] = groupTpl;
+                this.queue.groups[tag] = $.extend(true, {}, groupTpl);
             }
         },
 
@@ -206,6 +203,7 @@
             // recursion to load all items considering the queues
             // use timeInterval instead timeOut
             // check: http://jsperf.com/setinterval-vs-recursive-settimeout
+            // here we use a timeInterval instead a regular loop to enjoy the possibility of stop the queue
             loader = setInterval(function() {
                 // first, request items by group
                 if (group && group.itemsRequested < group.items.length) {
@@ -219,6 +217,7 @@
                 } else {
                     queue.isLoading = false;
                     clearInterval(loader);
+
                     return;
                 }
 
@@ -226,9 +225,9 @@
                 if (group) {
                     group.itemsRequested++;
                 }
+
                 queue.itemsRequested++;
                 self._load(item, group);
-
             }, 0);
         },
 
@@ -237,7 +236,11 @@
                 loadedItems = this.loaded.items;
 
             // check if the item has been loaded
+            // avoid multiple ajax calls for loaded items
             if (loadedItems.indexOf(item.url) <= -1) {
+                // add to array of loaded items
+                loadedItems[loadedItems.length] = item.url + ($.isPlainObject(item.data) ? '' : '?' + $.param(item.data));
+
                 // flag as loading and fire the starting callback
                 this.queue.isLoading = true;
                 item.isLoading = true;
@@ -250,9 +253,6 @@
                                 async: item.async ? item.async : self.opt.async
                             })
                             .success(function(data) {
-                                // add to array of loaded items
-                                self.loaded.items[loadedItems.length] = this.url + $.isPlainObject(item.data) ? '' : '?' + $.param(item.data);
-
                                 // the data will only be passed to callback if the item is a text file
                                 self.opt.onItem.complete((/\.(xml|json|script|html|text)$/).test(item.url) ? data : '');
 
@@ -260,7 +260,7 @@
                                 self.xhr = null;
 
                                 // runs the final complete callabck when complete all items
-                                if (self.items.length === self.loaded.items.length) {
+                                if (self.queue.items.length === loadedItems.length) {
                                     self.opt.on.complete();
                                 }
                             })
@@ -279,6 +279,8 @@
     /*
      * GLOBOL API
      */
+
+     // jQuery method
     $[_plugin] = function(fn, options) {
         var args = arguments,
             data = $.data(doc, _plugin),
@@ -309,6 +311,14 @@
         }
     };
 
-    $.fn[_plugin] = function() {};
+    // function for instances of the jQuery
+    /*$.fn[_plugin] = function(options) {
+        return this.each(function() {
+            if (!$(this).is('img')) {
+                $.error('The element is not a image.');
+                return;
+            }
+        });
+    };*/
 
 })(jQuery, window, document);

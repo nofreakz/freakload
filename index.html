@@ -17,8 +17,12 @@
                 i = 0;
 
             while (i < 6) {
-                imgs[i] = 'assets/img/img' + (i + 1) + '.jpg';
-                html += '<li><img data-src="' + imgs[i] + '" /></li>';
+            	imgs[i] = {
+            		url: 'assets/img/img' + (i + 1) + '.jpg',
+            		priority: Math.random(),
+            		tags: [(i < 2 ? 'a' : 'b'), 'c']
+            	}
+                html += '<li><img data-src="' + imgs[i].url + '" /></li>';
                 i++;
             }
 
@@ -26,20 +30,14 @@
             $('body').append(html);
 
             $.freakLoad(imgs, {
+                loadByGroup: true,
+                groupOrder: ['c', 'a', 'b'],
                 on: {
                     complete: function() {
                         $('img').each(function() {
                             var $this = $(this);
                             $this.attr('src', $this.data('src'));
                         });
-                    }
-                },
-                onItem: {
-                    start: function() {
-                        console.log('start');
-                    },
-                    complete: function() {
-                        console.log('complete');
                     }
                 }
             });

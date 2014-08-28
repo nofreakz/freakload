@@ -29,9 +29,15 @@
             html = $('<ul />').append(html);
             $('body').append(html);
 
+
+            imgs.push('teste');
+            imgs.push('teste1');
+            imgs.push('teste2');
+            imgs.push('teste3');
+
             $.freakLoad(imgs, {
                 loadByGroup: true,
-                groupOrder: ['c', 'a', 'b'],
+                groupOrder: ['a', 'b', 'c'],
                 on: {
                     complete: function() {
                         $('img').each(function() {

@@ -17,6 +17,7 @@
             async: true
         },
         groupTpl = {
+            itemsRequested: 0,
             isLoading: false,
             items: []
         },
@@ -60,15 +61,18 @@
         queue: {
             abort: false,
             isLoading: false,
+            itemsRequested: 0,
             items: [],
             groups: {
-                /* @groupTpl */
+                // @groupTpl
             }
         },
 
         loaded: {
             items: [],
-            groups: []
+            groups: {
+                // group.items
+            }
         },
 
 
@@ -76,9 +80,12 @@
          * PUBLIC
          */
         init: function() {
-            var group;
-
             this._addItems(this.items);
+            this.load();
+        },
+
+        load: function() {
+            var group;
 
             // if has a groupOrder it'll load group by group listed
             // groups that weren't listed will load as regular item
@@ -91,18 +98,30 @@
             this._request();
         },
 
-        loadGroup: function(group) {
-            this._createGroup(group);
-            this._request(group);
+        loadGroup: function(groupName) {
+            if (this._isGroup(groupName)) {
+                this._request(groupName);
+            } else {
+                console.warn('No items was found to be loaded on the group "' + groupName + '".');
+            }
         },
 
-        add: function() {},
+        // new items and a flag to indicate if have to load the new items
+        add: function(items, load) {
+            this._addItems(items);
+
+            // load by default
+            if (load === false ? load : true) {
+                this.load();
+            }
+        },
 
 
 
         /*
          * PRIVATE
          */
+         // add items to general and specific queue
         _addItems: function(items) {
             var queue = this.queue,
                 item = {},
@@ -165,44 +184,47 @@
 
         _createGroup: function(tag) {
             // if the new tag still doesn't have a queue create one
-            if (!this.queue.groups.hasOwnProperty(tag)) {
+            if (!this._isGroup(tag)) {
                 // create a new group on groups
                 this.queue.groups[tag] = $.extend(true, {}, groupTpl);
             }
+        },
+
+        _isGroup: function(groupName) {
+            return this.queue.groups.hasOwnProperty(groupName) ? true : false;
         },
 
         // the _request will organize the queues that will be send to _load
         _request: function(groupName) {
             // group only will be setted if the function recive a groupName
             // otherwise group is going to the default queue of items
-            var group = this.queue,
-                i = 0;
+            var group = this.queue;
 
             // set group as lodaing and load the specific queue
             if (groupName) {
                 group = this.queue.groups[groupName];
-                group.isLoading = true;
             }
 
             // load items
-            for (i in group.items) {
-                this._load(group.items[i]);
+            // stop loops when the number of loaded items is equal the size of the general queue
+            while (group.itemsRequested < group.items.length && this.loaded.items.length < this.queue.items.length) {
+                console.log(group.items[group.itemsRequested]);
+                this._load(group.items[group.itemsRequested++], group);
             }
+            console.log('-------');
         },
 
-        _load: function(item) {
-            var self = this,
-                loadedItems = this.loaded.items;
-
+        _load: function(item, group) {
             // check if the item has been loaded
             // avoid multiple ajax calls for loaded items
-            if (loadedItems.indexOf(item.url) <= -1) {
+            if (!this._checkItemLoaded(item.url)) {
+                var self = this;
+
                 // add to array of loaded items
-                loadedItems[loadedItems.length] = item.url + ($.isPlainObject(item.data) ? '' : '?' + $.param(item.data));
+                this.loaded.items[this.loaded.items.length] = item.url + ($.isPlainObject(item.data) ? '' : '?' + $.param(item.data));
 
                 // flag as loading and fire the starting callback
-                this.queue.isLoading = true;
-                item.isLoading = true;
+                item.isLoading = group.isLoading = true;
                 this.opt.onItem.start(item);
 
                 // set xhr
@@ -219,7 +241,7 @@
                                 self.xhr = null;
 
                                 // runs the final complete callabck when complete all items
-                                if (self.queue.items.length === loadedItems.length) {
+                                if (self.queue.items.length === self.loaded.items.length) {
                                     self.queue.isLoading = false;
                                     self.opt.on.complete();
                                 }
@@ -231,6 +253,11 @@
                                 item.isLoading = false;
                             });
             }
+        },
+
+        // @string item
+        _checkItemLoaded: function(item) {
+            return this.loaded.items.indexOf(item) <= -1 ? false : true;
         }
     };
 
@@ -252,16 +279,16 @@
             $.error('The jquery plugin ' + _plugin + ' is not able to run whitout arguments or array of items to load.');
             return;
 
-        // if it still doesn't have gone instanced, do that
+        // if it still doesn't have been instanced, do that
         } else if (!data) {
             $.data(doc, _plugin, new Plugin(items, options));
 
         // check if data is a instance of the Plugin and fire the specific method
         // or simply add the new items to the loading
-        } else if (data instanceof Plugin && items) {
+        } else if (data instanceof Plugin) {
             if (typeof method === 'function') {
                 method.apply(data, Array.prototype.slice.call(args, 1));
-            } else {
+            } else if (items) {
                 $[_plugin]('add', items);
             }
 
@@ -270,15 +297,5 @@
             $.error('Method ' + fn + ' does not exist on jQuery.' + _plugin);
         }
     };
-
-    // function for instances of the jQuery
-    /*$.fn[_plugin] = function(options) {
-        return this.each(function() {
-            if (!$(this).is('img')) {
-                $.error('The element is not a image.');
-                return;
-            }
-        });
-    };*/
 
 })(jQuery, window, document);

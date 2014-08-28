@@ -25,7 +25,6 @@
             async: true
         },
         groupTpl = {
-            itemsRequested: 0,
             isLoading: false,
             items: []
         },
@@ -67,7 +66,7 @@
 
         // use queue as object to possibility multiple queues
         queue: {
-            itemsRequested: 0,
+            abort: false,
             isLoading: false,
             items: [],
             groups: {
@@ -95,9 +94,9 @@
                 for (group in this.opt.groupOrder) {
                     this.loadGroup(this.opt.groupOrder[group]);
                 }
-            } else {
-                this._request();
             }
+
+            this._request();
         },
 
         loadGroup: function(group) {
@@ -181,54 +180,22 @@
         },
 
         // the _request will organize the queues that will be send to _load
-        // if it gets a groupName the queue of the group will be prioritized
         _request: function(groupName) {
-            var self = this,
-                loader = null,
-                queue = this.queue,
+            // group only will be setted if the function recive a groupName
+            // otherwise group is going to the default queue of items
+            var group = this.queue,
+                i = 0;
 
-                // group only will be setted if the function recive a groupName
-                group,
-
-                // item is going to be setted on loader
-                // it'will be the item to be sent to _load
-                item;
-
-            // set group as lodaing and point the specific queue to load
+            // set group as lodaing and load the specific queue
             if (groupName) {
-                group = queue.groups[groupName];
+                group = this.queue.groups[groupName];
                 group.isLoading = true;
             }
 
-            // recursion to load all items considering the queues
-            // use timeInterval instead timeOut
-            // check: http://jsperf.com/setinterval-vs-recursive-settimeout
-            // here we use a timeInterval instead a regular loop to enjoy the possibility of stop the queue
-            loader = setInterval(function() {
-                // first, request items by group
-                if (group && group.itemsRequested < group.items.length) {
-                    item = group.items[group.itemsRequested];
-
-                // request all items from queue where all items are inserted
-                } else if (queue.itemsRequested < queue.items.length) {
-                    item = queue.items[queue.itemsRequested];
-
-                // stop requests when don't have more items in any queue
-                } else {
-                    queue.isLoading = false;
-                    clearInterval(loader);
-
-                    return;
-                }
-
-                // fire the loading and increment itemRequested to know when the queue finished
-                if (group) {
-                    group.itemsRequested++;
-                }
-
-                queue.itemsRequested++;
-                self._load(item, group);
-            }, 0);
+            // load items
+            for (i in group.items) {
+                this._load(group.items[i]);
+            }
         },
 
         _load: function(item) {
@@ -261,6 +228,7 @@
 
                                 // runs the final complete callabck when complete all items
                                 if (self.queue.items.length === loadedItems.length) {
+                                    self.queue.isLoading = false;
                                     self.opt.on.complete();
                                 }
                             })

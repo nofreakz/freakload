@@ -12,6 +12,7 @@
   "indent": 4,
   "latedef": true,
   "lastsemic": false,
+  "laxbreak": true,
   "loopfunc": true,
   "maxdepth": false,
   "multistr": false,

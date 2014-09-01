@@ -13,13 +13,11 @@
             data: {},
             priority: 0.5,
             tags: [],
-            isLoading: false,
             async: true
         },
         groupTpl = {
-            itemsRequested: 0,
-            isLoading: false,
-            items: []
+            items: [],
+            loaded: 0
         },
         defaults = {
             async: true,
@@ -59,20 +57,16 @@
 
         // use queue as object to possibility multiple queues
         queue: {
-            abort: false,
-            isLoading: false,
-            itemsRequested: 0,
+            loaded: 0,
             items: [],
             groups: {
                 // @groupTpl
-            }
+            },
         },
 
-        loaded: {
+        requested: {
             items: [],
-            groups: {
-                // group.items
-            }
+            groups: []
         },
 
 
@@ -198,7 +192,9 @@
         _request: function(groupName) {
             // group only will be setted if the function recive a groupName
             // otherwise group is going to the default queue of items
-            var group = this.queue;
+            var group = this.queue,
+                i = 0,
+                len = 0;
 
             // set group as lodaing and load the specific queue
             if (groupName) {
@@ -207,25 +203,29 @@
 
             // load items
             // stop loops when the number of loaded items is equal the size of the general queue
-            while (group.itemsRequested < group.items.length && this.loaded.items.length < this.queue.items.length) {
-                console.log(group.items[group.itemsRequested]);
-                this._load(group.items[group.itemsRequested++], group);
+            for (len = group.items.length; i < len && this.requested.items.length < this.queue.items.length; i++) {
+                this._load(group.items[i], group, groupName);
             }
-            console.log('-------');
         },
 
-        _load: function(item, group) {
+        _load: function(item, group, groupName) {
             // check if the item has been loaded
             // avoid multiple ajax calls for loaded items
-            if (!this._checkItemLoaded(item.url)) {
+            if (this.requested.items.indexOf(item.url) === -1) {
                 var self = this;
 
+
                 // add to array of loaded items
-                this.loaded.items[this.loaded.items.length] = item.url + ($.isPlainObject(item.data) ? '' : '?' + $.param(item.data));
+                this.requested.items[this.requested.items.length] = item.url + ($.isPlainObject(item.data) ? '' : '?' + $.param(item.data));
 
                 // flag as loading and fire the starting callback
                 item.isLoading = group.isLoading = true;
                 this.opt.onItem.start(item);
+
+                if (this.requested.groups.indexOf(groupName) === -1) {
+                    this.requested.groups[this.requested.groups.length] = groupName;
+                    this.opt.onGroup.start(groupName);
+                }
 
                 // set xhr
                 this.xhr = $.ajax({
@@ -234,30 +234,29 @@
                                 async: item.async ? item.async : self.opt.async
                             })
                             .success(function(data) {
+                                group.loaded++;
+                                self.queue.loaded++;
+
                                 // the data will only be passed to callback if the item is a text file
                                 self.opt.onItem.complete((/\.(xml|json|script|html|text)$/).test(item.url) ? data : '');
 
-                                // clean the xhr
-                                self.xhr = null;
+                                // runs group callabck when complete all items
+                                if (groupName && (group.loaded === group.items.length || self.queue.loaded === self.queue.items.length)) {
+                                    self.opt.onGroup.complete(groupName);
+                                }
 
                                 // runs the final complete callabck when complete all items
-                                if (self.queue.items.length === self.loaded.items.length) {
-                                    self.queue.isLoading = false;
+                                if (self.queue.loaded === self.queue.items.length) {
                                     self.opt.on.complete();
                                 }
+
+                                // clean the xhr
+                                self.xhr = null;
                             })
                             .fail(function(jqXHR) {
                                 $.error(jqXHR.responseText);
-                            })
-                            .always(function() {
-                                item.isLoading = false;
                             });
             }
-        },
-
-        // @string item
-        _checkItemLoaded: function(item) {
-            return this.loaded.items.indexOf(item) <= -1 ? false : true;
         }
     };
 

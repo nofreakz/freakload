@@ -34,20 +34,20 @@ module.exports = function(grunt) {
         less: {
             development: {
                 options: {
-                    paths: ['dist/css']
+                    paths: ['assets/css']
                 },
                 files: {
-                    'dist/css/main.css': 'src/less/main.less'
+                    'assets/css/main.css': 'assets/less/main.less'
                 }
             },
             production: {
                 options: {
-                    paths: ['dist/css'],
+                    paths: ['assets/css'],
                     compress: true,
                     cleancss: true
                 },
                 files: {
-                    'dist/css/main.min.css': 'src/less/main.less'
+                    'assets/css/main.min.css': 'assets/less/main.less'
                 }
             }
         },

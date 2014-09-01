@@ -29,7 +29,6 @@
         },
         defaults = {
             async: true,
-            loadByGroup: false,
             groupOrder: [],
             on: {
                 start: $.noop,
@@ -91,7 +90,7 @@
 
             // if has a groupOrder it'll load group by group listed
             // groups that weren't listed will load as regular item
-            if (this.opt.loadByGroup) {
+            if (this.opt.groupOrder.length) {
                 for (group in this.opt.groupOrder) {
                     this.loadGroup(this.opt.groupOrder[group]);
                 }

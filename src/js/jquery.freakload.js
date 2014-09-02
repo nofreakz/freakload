@@ -14,7 +14,11 @@
             priority: 0.5,
             tags: [],
             async: true,
-            progress: 0
+            progress: 0,
+            on: {
+                start: $.noop,
+                complete: $.noop
+            }
         },
         groupTpl = {
             items: [],
@@ -43,9 +47,8 @@
      * CONSTRUCTOR
      */
     function Plugin(items, options) {
-        this.items = items;
         this.opt = $.extend(true, {}, defaults, options);
-        this.init();
+        this.init(items);
     }
 
     Plugin.prototype = {
@@ -73,8 +76,8 @@
         /*
          * PUBLIC
          */
-        init: function() {
-            this._addItems(this.items);
+        init: function(items) {
+            this._addItems(items);
             this.load();
         },
 
@@ -140,6 +143,7 @@
                     }
                 }
             }
+
         },
 
         _normalizeItems: function(items) {
@@ -219,7 +223,7 @@
                 this.requested.items[this.requested.items.length] = item.url + ($.isPlainObject(item.data) ? '' : '?' + $.param(item.data));
 
                 // flag as loading and fire the starting callback
-                this.opt.onItem.start(item);
+                (item.on.start !== $.noop ? item.on.start : this.opt.onItem.start)(item);
 
                 if (this.requested.groups.indexOf(groupName) === -1) {
                     this.requested.groups[this.requested.groups.length] = groupName;
@@ -244,11 +248,13 @@
                                 async: item.async ? item.async : self.opt.async
                             })
                             .success(function(data) {
+                                var _data = (/\.(xml|json|script|html|text)$/).test(item.url) ? data : '';
+
                                 group.loaded++;
                                 self.queue.loaded++;
 
                                 // the data will only be passed to callback if the item is a text file
-                                self.opt.onItem.complete((/\.(xml|json|script|html|text)$/).test(item.url) ? data : '');
+                                (item.on.complete !== $.noop ? item.on.complete : self.opt.onItem.complete)(_data);
 
                                 // runs group callabck when complete all items
                                 if (groupName && (group.loaded === group.items.length || self.queue.loaded === self.queue.items.length)) {
@@ -280,25 +286,24 @@
     $[_plugin] = function(fn, options) {
         var args = arguments,
             data = $.data(doc, _plugin),
-            items = fn instanceof Array ? fn : false,
-            method = data && !items ? data[fn] : false;
+            method = data && data[fn] ? data[fn] : false;
 
         // force to pass a method or items to plugin load
-        if (!args.length || (!data && !items)) {
+        if (!args.length) {
             $.error('The jquery plugin ' + _plugin + ' is not able to run whitout arguments or array of items to load.');
-            return;
 
         // if it still doesn't have been instanced, do that
         } else if (!data) {
-            $.data(doc, _plugin, new Plugin(items, options));
+            // fn here is the new items
+            $.data(doc, _plugin, new Plugin(fn, options));
 
         // check if data is a instance of the Plugin and fire the specific method
         // or simply add the new items to the loading
         } else if (data instanceof Plugin) {
             if (typeof method === 'function') {
                 method.apply(data, Array.prototype.slice.call(args, 1));
-            } else if (items) {
-                $[_plugin]('add', items);
+            } else {
+                $[_plugin]('add', fn);
             }
 
         // finally if the method doesn't exist or is a private method show a console error
@@ -308,10 +313,12 @@
     };
 
     $.fn[_plugin] = function(options) {
-        var args = arguments;
-
         return this.each(function() {
-            console.log(options, args);
+            if (this.dataset.tags) {
+                this.dataset.tags.replace(/\s+/g, '').split(',');
+            }
+
+            $[_plugin]($.extend({}, itemTpl, this.dataset, options));
         });
     };
 

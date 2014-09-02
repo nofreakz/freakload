@@ -13,7 +13,8 @@
             data: {},
             priority: 0.5,
             tags: [],
-            async: true
+            async: true,
+            progress: 0
         },
         groupTpl = {
             items: [],
@@ -218,7 +219,6 @@
                 this.requested.items[this.requested.items.length] = item.url + ($.isPlainObject(item.data) ? '' : '?' + $.param(item.data));
 
                 // flag as loading and fire the starting callback
-                item.isLoading = group.isLoading = true;
                 this.opt.onItem.start(item);
 
                 if (this.requested.groups.indexOf(groupName) === -1) {
@@ -228,6 +228,17 @@
 
                 // set xhr
                 this.xhr = $.ajax({
+                                xhr: function() {
+                                       var _xhr = new win.XMLHttpRequest();
+
+                                       _xhr.addEventListener('progress', function(evt) {
+                                           if (evt.lengthComputable) {
+                                               item.progress = evt.loaded / evt.total;
+                                           }
+                                       }, false);
+
+                                       return _xhr;
+                                },
                                 url: item.url,
                                 data: item.data,
                                 async: item.async ? item.async : self.opt.async
@@ -294,6 +305,14 @@
         } else if (!method || (typeof fn === 'string' && fn.charAt(0) === '_')) {
             $.error('Method ' + fn + ' does not exist on jQuery.' + _plugin);
         }
+    };
+
+    $.fn[_plugin] = function(options) {
+        var args = arguments;
+
+        return this.each(function() {
+            console.log(options, args);
+        });
     };
 
 })(jQuery, window, document);

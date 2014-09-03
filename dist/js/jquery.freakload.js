@@ -23,10 +23,8 @@
             tags: [],
             async: true,
             progress: 0,
-            on: {
-                start: $.noop,
-                complete: $.noop
-            }
+            onStart: $.noop,
+            onComplete: $.noop
         },
         groupTpl = {
             items: [],
@@ -35,17 +33,15 @@
         defaults = {
             async: true,
             groupOrder: [],
-            on: {
-                start: $.noop,
-                complete: $.noop
+            onStart: $.noop,
+            onComplete: $.noop,
+            item: {
+                onStart: $.noop,
+                onComplete: $.noop
             },
-            onItem: {
-                start: $.noop,
-                complete: $.noop
-            },
-            onGroup: {
-                start: $.noop,
-                complete: $.noop
+            group: {
+                onStart: $.noop,
+                onComplete: $.noop
             }
         };
 
@@ -86,6 +82,7 @@
          */
         init: function(items) {
             this._addItems(items);
+            this.opt.onStart();
             this.load();
         },
 
@@ -231,11 +228,11 @@
                 this.requested.items[this.requested.items.length] = item.url + ($.isPlainObject(item.data) ? '' : '?' + $.param(item.data));
 
                 // flag as loading and fire the starting callback
-                (item.on.start !== $.noop ? item.on.start : this.opt.onItem.start)(item);
+                (item.onStart !== $.noop ? item.onStart : this.opt.item.onStart)();
 
                 if (this.requested.groups.indexOf(groupName) === -1) {
                     this.requested.groups[this.requested.groups.length] = groupName;
-                    this.opt.onGroup.start(groupName);
+                    this.opt.group.onStart(groupName);
                 }
 
                 // set xhr
@@ -256,22 +253,20 @@
                                 async: item.async ? item.async : self.opt.async
                             })
                             .success(function(data) {
-                                var _data = (/\.(xml|json|script|html|text)$/).test(item.url) ? data : '';
-
                                 group.loaded++;
                                 self.queue.loaded++;
 
                                 // the data will only be passed to callback if the item is a text file
-                                (item.on.complete !== $.noop ? item.on.complete : self.opt.onItem.complete)(_data);
+                                (item.onComplete !== $.noop ? item.onComplete : self.opt.item.onComplete)((/\.(xml|json|script|html|text)$/).test(item.url) ? data : '');
 
                                 // runs group callabck when complete all items
                                 if (groupName && (group.loaded === group.items.length || self.queue.loaded === self.queue.items.length)) {
-                                    self.opt.onGroup.complete(groupName);
+                                    self.opt.group.onComplete(groupName);
                                 }
 
                                 // runs the final complete callabck when complete all items
                                 if (self.queue.loaded === self.queue.items.length) {
-                                    self.opt.on.complete();
+                                    self.opt.onComplete();
                                 }
 
                                 // clean the xhr

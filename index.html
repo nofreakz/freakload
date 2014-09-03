@@ -8,22 +8,20 @@
 <body>
     <h1>FreakLoad</h1>
 
-    <img data-url="assets/img/img1.jpg" data-priority="0.3" data-tags="a" alt="img-1" />
-    <img data-url="assets/img/img2.jpg" data-priority="1" data-tags="a" alt="img-2" />
-    <img data-url="assets/img/img6.jpg" data-priority="0.8" data-tags="a,c" alt="img-6" />
-    <img data-url="assets/img/img3.jpg" data-priority="0.3" data-tags="b" alt="img-3" />
-    <img data-url="assets/img/img4.jpg" data-priority="0.7" data-tags="b" alt="img-4" />
-    <img data-url="assets/img/img5.jpg" data-priority="0.1" data-tags="b,c" alt="img-5" />
+    <img data-url="assets/img/img1.jpg" data-priority="0.1" data-tags="a" alt="img-1" />
+    <img data-url="assets/img/img2.jpg" data-priority="0.3" data-tags="a" alt="img-2" />
+    <img data-url="assets/img/img3.jpg" data-priority="0.5" data-tags="a" alt="img-3" />
+    <img data-url="assets/img/img4.jpg" data-priority="0.7" data-tags="c" alt="img-4" />
+    <img data-url="assets/img/img5.jpg" data-priority="0.9" data-tags="b" alt="img-5" />
+    <img data-url="assets/img/img6.jpg" data-priority="1.0" data-tags="b" alt="img-6" />
 
     <script src="assets/vendor/jquery/dist/jquery.min.js"></script>
     <script src="dist/js/jquery.freakload.js"></script>
     <script>
         $(function() {
             $('img').freakLoad({
-                on: {
-                    start: function() { console.log(1); },
-                    complete: function() { console.log(2); }
-                }
+                onStart: function() {},
+                onComplete: function() {}
             });
         });
     </script>

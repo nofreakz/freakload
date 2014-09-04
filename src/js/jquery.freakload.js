@@ -16,7 +16,8 @@
             async: true,
             progress: 0,
             onStart: $.noop,
-            onComplete: $.noop
+            onComplete: $.noop,
+            xhr: null
         },
         groupTpl = {
             items: [],
@@ -228,7 +229,7 @@
                 }
 
                 // set xhr
-                this.xhr = $.ajax({
+                item.xhr = $.ajax({
                                 xhr: function() {
                                        var _xhr = new win.XMLHttpRequest();
 

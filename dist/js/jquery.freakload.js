@@ -60,9 +60,6 @@
         /*
          * DATA
          */
-        xhr: null, // XMLHttpRequest
-
-
         // use queue as object to possibility multiple queues
         queue: {
             loaded: 0,
@@ -149,7 +146,6 @@
                     }
                 }
             }
-
         },
 
         _normalizeItems: function(items) {
@@ -271,7 +267,7 @@
                                 }
 
                                 // clean the xhr
-                                self.xhr = null;
+                                item.xhr = null;
                             })
                             .fail(function(jqXHR) {
                                 $.error(jqXHR.responseText);
@@ -317,8 +313,9 @@
     };
 
     $.fn[_plugin] = function(options) {
-        console.log(this);
         return this.each(function() {
+            console.log(this);
+
             if (this.dataset.tags) {
                 this.dataset.tags.replace(/\s+/g, '').split(',');
             }

@@ -1,24 +1,18 @@
 @import url('/assets/vendor/normalize-css/normalize.css');
 
-body { background: #000;}
-h1 {
-    text-align: center;
+body {
+    background: #111;
     color: #fff;
 }
-ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-li {
-    width: 75%;
-    margin: 0 auto;
-    & + & {
-        margin-top: 25px;
-    }
-}
+h1 { text-align: center; }
 img {
-    max-width: 100%;
+    max-width: 75%;
     display: block;
     border-radius: 5%;
+    margin: 0 auto;
+    box-shadow: 0 5px 10px #000;
+
+    & + & {
+        margin-top: 5%;
+    }
 }

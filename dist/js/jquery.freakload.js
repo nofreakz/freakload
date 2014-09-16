@@ -17,6 +17,7 @@
      */
     var _plugin = 'freakLoad',
         itemTpl = {
+            node: undefined,
             url: '',
             data: {},
             priority: 0.5,
@@ -130,6 +131,7 @@
                 t = 0;
 
             items = this._normalizeItems(items);
+            this._setPriority(items);
 
             for (i in items) {
                 item = items[i];
@@ -167,8 +169,6 @@
 
                 items[i] = item = $.extend({}, itemTpl, item);
             }
-
-            this._setPriority(items);
 
             return items;
         },
@@ -232,6 +232,8 @@
                     this.opt.group.onStart(groupName);
                 }
 
+                console.log(item.tags);
+
                 // set xhr
                 item.xhr = $.ajax({
                                 xhr: function() {
@@ -254,7 +256,7 @@
                                 self.queue.loaded++;
 
                                 // the data will only be passed to callback if the item is a text file
-                                (item.onComplete !== $.noop ? item.onComplete : self.opt.item.onComplete)((/\.(xml|json|script|html|text)$/).test(item.url) ? data : '');
+                                (item.onComplete !== $.noop ? item.onComplete : self.opt.item.onComplete)((/\.(xml|json|script|html|text)$/).test(item.url) ? data : '', item.node);
 
                                 // runs group callabck when complete all items
                                 if (groupName && (group.loaded === group.items.length || self.queue.loaded === self.queue.items.length)) {
@@ -281,8 +283,6 @@
     /*
      * GLOBOL API
      */
-
-     // jQuery method
     $[_plugin] = function(fn, options) {
         var args = arguments,
             data = $.data(doc, _plugin),
@@ -312,16 +312,16 @@
         }
     };
 
-    $.fn[_plugin] = function(options) {
-        return this.each(function() {
-            console.log(this);
+    $.fn[_plugin] = function(itemOptions, generalOptions) {
+        var items = $.map(this, function(item) {
+            var dataset = JSON.parse(JSON.stringify(item.dataset)),
+                tags = dataset.tags;
 
-            if (this.dataset.tags) {
-                this.dataset.tags.replace(/\s+/g, '').split(',');
-            }
-
-            $[_plugin]($.extend({}, itemTpl, this.dataset, options));
+            dataset.tags = tags ? tags.replace(/\s+/g, '').split(',') : [];
+            return $.extend({node: item}, dataset, itemOptions);
         });
+
+        $[_plugin](items, generalOptions);
     };
 
 })(jQuery, window, document);

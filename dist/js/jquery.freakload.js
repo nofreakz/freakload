@@ -220,19 +220,16 @@
             if (this.requested.items.indexOf(item.url) === -1) {
                 var self = this;
 
-
                 // add to array of loaded items
                 this.requested.items[this.requested.items.length] = item.url + ($.isPlainObject(item.data) ? '' : '?' + $.param(item.data));
 
                 // flag as loading and fire the starting callback
-                (item.onStart !== $.noop ? item.onStart : this.opt.item.onStart)();
+                (item.onStart !== $.noop ? item.onStart : this.opt.item.onStart)(item.node);
 
                 if (this.requested.groups.indexOf(groupName) === -1) {
                     this.requested.groups[this.requested.groups.length] = groupName;
                     this.opt.group.onStart(groupName);
                 }
-
-                console.log(item.tags);
 
                 // set xhr
                 item.xhr = $.ajax({
@@ -252,7 +249,9 @@
                                 async: item.async ? item.async : self.opt.async
                             })
                             .success(function(data) {
-                                group.loaded++;
+                                if (groupName) {
+                                    group.loaded++;
+                                }
                                 self.queue.loaded++;
 
                                 // the data will only be passed to callback if the item is a text file

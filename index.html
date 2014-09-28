@@ -20,13 +20,13 @@
     <script>
         $(function() {
             $('img').freakLoad({
-                onStart: function() { console.log(1); },
+                onStart: function(item) { console.log(item); },
                 onComplete: function(data, item) {
                     item.src = item.dataset.url;
                 }
-            }, {
+            }/*, {
                 groupOrder: ['c', 'a', 'b']
-            });
+            }*/);
         });
     </script>
 

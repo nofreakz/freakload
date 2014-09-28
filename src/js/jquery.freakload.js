@@ -53,21 +53,21 @@
         /*
          * DATA
          */
-        // use queue as object to possibility multiple queues
-        queue: {
-            loaded: 0,
-            items: [],
-            groups: {
-                // @groupTpl
+        data: {
+            // use queue as object to possibility multiple queues
+            queue: {
+                loaded: 0,
+                items: [],
+                groups: {} // @groupTpl
             },
-        },
 
-        requested: {
-            items: [],
-            groups: []
-        },
+            requested: {
+                items: [],
+                groups: []
+            },
 
-        progress: 0,
+            progress: 0
+        },
 
 
 
@@ -113,8 +113,7 @@
         },
 
         getData: function() {
-            alert(1);
-            return 'teste';
+            return this.data;
         },
 
 
@@ -124,7 +123,7 @@
          */
          // add items to general and specific queue
         _addItems: function(items) {
-            var queue = this.queue,
+            var queue = this.data.queue,
                 item = {},
                 tag = '',
                 i = 0,
@@ -186,48 +185,51 @@
             // if the new tag still doesn't have a queue create one
             if (!this._isGroup(tag)) {
                 // create a new group on groups
-                this.queue.groups[tag] = $.extend(true, {}, groupTpl);
+                this.data.queue.groups[tag] = $.extend(true, {}, groupTpl);
             }
         },
 
         _isGroup: function(groupName) {
-            return this.queue.groups.hasOwnProperty(groupName) ? true : false;
+            return this.data.queue.groups.hasOwnProperty(groupName) ? true : false;
         },
 
         // the _request will organize the queues that will be send to _load
         _request: function(groupName) {
             // group only will be setted if the function recive a groupName
             // otherwise group is going to the default queue of items
-            var group = this.queue,
+            var data = this.data,
+                group = data.queue,
                 i = 0,
                 len = 0;
 
             // set group as lodaing and load the specific queue
             if (groupName) {
-                group = this.queue.groups[groupName];
+                group = data.queue.groups[groupName];
             }
 
             // load items
             // stop loops when the number of loaded items is equal the size of the general queue
-            for (len = group.items.length; i < len && this.requested.items.length < this.queue.items.length; i++) {
+            for (len = group.items.length; i < len && data.requested.items.length < data.queue.items.length; i++) {
                 this._load(group.items[i], group, groupName);
             }
         },
 
         _load: function(item, group, groupName) {
+            var self = this,
+                data = this.data;
+
             // check if the item has been loaded
             // avoid multiple ajax calls for loaded items
-            if (this.requested.items.indexOf(item.url) === -1) {
-                var self = this;
+            if (data.requested.items.indexOf(item.url) === -1) {
 
                 // add to array of loaded items
-                this.requested.items[this.requested.items.length] = item.url + ($.isPlainObject(item.data) ? '' : '?' + $.param(item.data));
+                data.requested.items[data.requested.items.length] = item.url + ($.isPlainObject(item.data) ? '' : '?' + $.param(item.data));
 
                 // flag as loading and fire the starting callback
                 (item.onStart !== $.noop ? item.onStart : this.opt.item.onStart)(item.node);
 
-                if (groupName && this.requested.groups.indexOf(groupName) === -1) {
-                    this.requested.groups[this.requested.groups.length] = groupName;
+                if (groupName && data.requested.groups.indexOf(groupName) === -1) {
+                    data.requested.groups[data.requested.groups.length] = groupName;
                     this.opt.group.onStart(groupName);
                 }
 
@@ -248,22 +250,22 @@
                                 data: item.data,
                                 async: item.async ? item.async : self.opt.async
                             })
-                            .success(function(data) {
+                            .success(function(response) {
                                 if (groupName) {
                                     group.loaded++;
                                 }
-                                self.queue.loaded++;
+                                data.queue.loaded++;
 
                                 // the data will only be passed to callback if the item is a text file
-                                (item.onComplete !== $.noop ? item.onComplete : self.opt.item.onComplete)((/\.(xml|json|script|html|text)$/).test(item.url) ? data : '', item.node);
+                                (item.onComplete !== $.noop ? item.onComplete : self.opt.item.onComplete)((/\.(xml|json|script|html|text)$/).test(item.url) ? response : '', item.node);
 
                                 // runs group callabck when complete all items
-                                if (groupName && (group.loaded === group.items.length || self.queue.loaded === self.queue.items.length)) {
+                                if (groupName && (group.loaded === group.items.length || data.queue.loaded === data.queue.items.length)) {
                                     self.opt.group.onComplete(groupName);
                                 }
 
                                 // runs the final complete callabck when complete all items
-                                if (self.queue.loaded === self.queue.items.length) {
+                                if (data.queue.loaded === data.queue.items.length) {
                                     self.opt.onComplete();
                                 }
 

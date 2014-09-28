@@ -75,6 +75,9 @@
             groups: []
         },
 
+        progress: 0,
+
+
 
         /*
          * PUBLIC
@@ -115,6 +118,11 @@
             if (load === false ? load : true) {
                 this.load();
             }
+        },
+
+        getData: function() {
+            console.log({}, this.queue, this.requested, this.progress);
+            return x;
         },
 
 
@@ -226,7 +234,7 @@
                 // flag as loading and fire the starting callback
                 (item.onStart !== $.noop ? item.onStart : this.opt.item.onStart)(item.node);
 
-                if (this.requested.groups.indexOf(groupName) === -1) {
+                if (groupName && this.requested.groups.indexOf(groupName) === -1) {
                     this.requested.groups[this.requested.groups.length] = groupName;
                     this.opt.group.onStart(groupName);
                 }
@@ -274,6 +282,10 @@
                                 $.error(jqXHR.responseText);
                             });
             }
+        },
+
+        _updateProgress: function() {
+
         }
     };
 

@@ -167,6 +167,7 @@
                 }
 
                 items[i] = item = $.extend({}, itemTpl, item);
+                item.priority = parseFloat(item.priority) || 0.1;
             }
 
             return items;
@@ -270,9 +271,10 @@
                                 }
 
                                 // clean the xhr
-                                item.xhr = null;
+                                item.xhr = 'complete';
                             })
                             .fail(function(jqXHR) {
+                                item.xhr = 'fail';
                                 throw jqXHR.responseText;
                             });
             }

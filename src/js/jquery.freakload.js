@@ -113,8 +113,8 @@
         },
 
         getData: function() {
-            console.log({}, this.queue, this.requested, this.progress);
-            return x;
+            alert(1);
+            return 'teste';
         },
 
 
@@ -304,7 +304,7 @@
         // or simply add the new items to the loading
         } else if (data instanceof Plugin) {
             if (typeof method === 'function') {
-                method.apply(data, Array.prototype.slice.call(args, 1));
+                return method.apply(data, Array.prototype.slice.call(args, 1));
             } else {
                 $[_plugin]('add', fn);
             }

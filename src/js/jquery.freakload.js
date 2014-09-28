@@ -273,7 +273,7 @@
                                 item.xhr = null;
                             })
                             .fail(function(jqXHR) {
-                                $.error(jqXHR.responseText);
+                                throw jqXHR.responseText;
                             });
             }
         },
@@ -295,7 +295,7 @@
 
         // force to pass a method or items to plugin load
         if (!args.length) {
-            $.error('The jquery plugin ' + _plugin + ' is not able to run whitout arguments or array of items to load.');
+            throw 'The jquery plugin ' + _plugin + ' is not able to run whitout arguments or array of items to load.';
 
         // if it still doesn't have been instanced, do that
         } else if (!data) {
@@ -313,7 +313,7 @@
 
         // finally if the method doesn't exist or is a private method show a console error
         } else if (!method || (typeof fn === 'string' && fn.charAt(0) === '_')) {
-            $.error('Method ' + fn + ' does not exist on jQuery.' + _plugin);
+            throw 'Method ' + fn + ' does not exist on jQuery.' + _plugin;
         }
     };
 

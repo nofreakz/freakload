@@ -10,8 +10,8 @@
 
     <img data-url="assets/img/img1.jpg" data-priority="teste" data-tags="a, b" alt="img-1" />
     <img data-url="assets/img/img2.jpg" data-priority="0.3" data-tags="a" alt="img-2" />
-    <img data-url="assets/img/img3.jpg" data-priority="0.5" data-tags="a" alt="img-3" />
     <img data-url="assets/img/img4.jpg" data-priority="0.7" data-tags="c" alt="img-4" />
+    <img data-url="assets/img/img3.jpg" data-priority="0.5" data-tags="a" alt="img-3" />
     <img data-url="assets/img/img5.jpg" data-priority="0.9" data-tags="b" alt="img-5" />
     <img data-url="assets/img/img6.jpg" data-priority="1.0" data-tags="b" alt="img-6" />
 
@@ -19,14 +19,23 @@
     <script src="dist/js/jquery.freakload.js"></script>
     <script>
         $(function() {
-            $('img').freakLoad({
-                onStart: function(item) { console.log(item); },
-                onComplete: function(data, item) {
-                    item.src = item.dataset.url;
+            $('img').freakLoad(
+                // item options
+                {
+                    onStart: function(item) {
+                        console.log(item);
+                    },
+                    onComplete: function(data, item) {
+                        item.src = item.dataset.url;
+                        item.classList.add('loaded');
+                    }
+                },
+
+                // general options
+                {
+                    groupOrder: ['c', 'a', 'b']
                 }
-            }/*, {
-                groupOrder: ['c', 'a', 'b']
-            }*/);
+            );
         });
     </script>
 
@@ -50,7 +59,6 @@
             $('body').append(html);
 
             $.freakLoad(imgs, {
-                loadByGroup: true,
                 groupOrder: ['a', 'b', 'c'],
                 on: {
                     complete: function() {

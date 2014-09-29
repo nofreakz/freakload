@@ -2,17 +2,35 @@
 body {
   background: #111;
   color: #fff;
+  text-align: center;
 }
 h1 {
   text-align: center;
+  margin-bottom: 35px;
 }
 img {
-  max-width: 75%;
-  display: block;
+  display: inline-block;
   border-radius: 5%;
   margin: 0 auto;
   box-shadow: 0 5px 10px #000;
+  opacity: 0;
+  transition: .5s;
+  position: relative;
+  margin: 0 15px;
+  max-width: 27%;
 }
 img + img {
-  margin-top: 5%;
+  margin-top: 25px;
+}
+img:hover {
+  transform: scale(1.2);
+  z-index: 9;
+}
+.loaded {
+  opacity: 1;
+}
+@media (max-width: 960px) {
+  img {
+    max-width: 75%;
+  }
 }

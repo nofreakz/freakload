@@ -112,6 +112,17 @@
             }
         },
 
+        abort: function(item) {
+            if (item) {
+                _abortItem(item);
+                return;
+            }
+
+            for (var l = this.queue.loaded; l < this.queue.length; l++) {
+                _abortItem(this.queue.items[l]);
+            }
+        },
+
         getData: function() {
             return this.data;
         },
@@ -147,6 +158,11 @@
                     }
                 }
             }
+        },
+
+        _abortItem: function(item) {
+            item.xhr.abort();
+            item.progress = 0;
         },
 
         _normalizeItems: function(items) {
@@ -280,9 +296,7 @@
             }
         },
 
-        _updateProgress: function() {
-
-        }
+        _updateProgress: function() {}
     };
 
 
